@@ -1,0 +1,190 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Acme Tests",
+		"_postman_id": "e7ea75f5-2b0e-d149-7fea-c3f82fa6c85a",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "POST success returns 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"UUID was returned\"] = responseBody.has(\"id\");",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://localhost:8080/v1/cc/applications/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\n    \"requestedCreditLimit\": \"5000\",\n    \"cardType\": \"SKYMILES\",\n    \"borrowers\": [\n        {\n            \"firstName\": \"Adam\",\n            \"lastName\": \"Smith\",\n            \"age\": \"35\",\n            \"address\": \"123 Main St.\",\n            \"city\": \"Concord\",\n            \"state\": \"NC\",\n            \"zip\": \"28027\",\n            \"ssn\": \"555555555\",\n            \"relationship\": \"primary\",\n            \"employment\": [\n                {\n                    \"startDate\": \"2015-06-01\",\n                    \"endDate\": \"\",\n                    \"employerName\": \"ABC Supply Co.\",\n                    \"employerPhone\": \"5555555555\" \n                }]\n        }]\n}\n"
+				},
+				"description": "Tests POST success"
+			},
+			"response": []
+		},
+		{
+			"name": "POST with missing field returns 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var data = JSON.parse(responseBody);",
+							"tests[\"Appropriate response message\"] = data.error === \"One or more fields were missing in the application.\";",
+							"tests[\"Status code is 400\"] = responseCode.code === 400;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://localhost:8080/v1/cc/applications/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\n    \"requestedCreditLimit\": \"5000\",\n    \"cardType\": \"SKYMILES\",\n    \"borrowers\": [\n        {\n            \"firstName\": \"Adam\",\n            \"lastName\": null,\n            \"age\": \"35\",\n            \"address\": \"123 Main St.\",\n            \"city\": \"Concord\",\n            \"state\": \"NC\",\n            \"zip\": \"28027\",\n            \"ssn\": \"555555555\",\n            \"relationship\": \"primary\",\n            \"employment\": [\n                {\n                    \"startDate\": \"2015-06-01\",\n                    \"endDate\": \"\",\n                    \"employerName\": \"ABC Supply Co.\",\n                    \"employerPhone\": \"5555555555\" \n                }]\n        }]\n}\n"
+				},
+				"description": "Tests null field response"
+			},
+			"response": []
+		},
+		{
+			"name": "POST with minority applicatant returns 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var data = JSON.parse(responseBody);",
+							"tests[\"Appropriate response message\"] = data.error === \"com.acme.service.AgeOfMajorityException: Borrower Adam Smith too young to apply.\";",
+							"tests[\"Status code is 400\"] = responseCode.code === 400;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://localhost:8080/v1/cc/applications/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\n    \"requestedCreditLimit\": \"5000\",\n    \"cardType\": \"SKYMILES\",\n    \"borrowers\": [\n        {\n            \"firstName\": \"Adam\",\n            \"lastName\": \"Smith\",\n            \"age\": \"17\",\n            \"address\": \"123 Main St.\",\n            \"city\": \"Concord\",\n            \"state\": \"NC\",\n            \"zip\": \"28027\",\n            \"ssn\": \"555555555\",\n            \"relationship\": \"primary\",\n            \"employment\": [\n                {\n                    \"startDate\": \"2015-06-01\",\n                    \"endDate\": \"\",\n                    \"employerName\": \"ABC Supply Co.\",\n                    \"employerPhone\": \"5555555555\" \n                }]\n        }]\n}\n"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "POST above requested credit limit returns 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var data = JSON.parse(responseBody);",
+							"tests[\"Appropriate response message\"] = data.error === \"com.acme.service.CreditLimitException: Requested credit above limit of $10,000.\"",
+							"tests[\"Status code is 400\"] = responseCode.code === 400;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://localhost:8080/v1/cc/applications/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\n    \"requestedCreditLimit\": \"15000\",\n    \"cardType\": \"SKYMILES\",\n    \"borrowers\": [\n        {\n            \"firstName\": \"Adam\",\n            \"lastName\": \"Smith\",\n            \"age\": \"35\",\n            \"address\": \"123 Main St.\",\n            \"city\": \"Concord\",\n            \"state\": \"NC\",\n            \"zip\": \"28027\",\n            \"ssn\": \"555555555\",\n            \"relationship\": \"primary\",\n            \"employment\": [\n                {\n                    \"startDate\": \"2015-06-01\",\n                    \"endDate\": \"\",\n                    \"employerName\": \"ABC Supply Co.\",\n                    \"employerPhone\": \"5555555555\" \n                }]\n        }]\n}\n"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET with blank UUID returns 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var data = JSON.parse(responseBody);",
+							"tests[\"Proper error message returned\"] = data.error === \"UUID cannot be blank.\"",
+							"tests[\"Status code is 400\"] = responseCode.code === 400;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://localhost:8080/v1/cc/applications/",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "GET with bad UUID returns 404",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var data = JSON.parse(responseBody);",
+							"tests[\"Proper error message returned\"] = data.error === \"Application not found for UUID: 1234\"",
+							"tests[\"Status code is 404\"] = responseCode.code === 404;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://localhost:8080/v1/cc/applications/1234",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,25 @@
+{
+
+    "requestedAmount": "45000",
+    "address":"456 Main St.",
+    "customer": true,
+    "borrowers": [
+        {
+            "firstName": "Adam",
+            "lastName": "Smith",
+            "age": "35",
+            "address": "123 Main St.",
+            "city": "Concord",
+            "state": "NC",
+            "zip": "28027",
+            "ssn": "555-55-5555",
+            "relationship": "primary",
+            "employment": [
+                {
+                    "startDate": "Jun 01, 2015",
+                    "endDate": "",
+                    "employerName": "ABC Supply Co.",
+                    "employerPhone": "555-555-5555"
+                }]
+        }]
+}
